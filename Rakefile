@@ -1,12 +1,14 @@
 require "rubygems"
 require "bundler/setup"
 require "stringex"
+require "yui/compressor"
+require "html_compressor"
 
 ## -- Rsync Deploy config -- ##
 # Be sure your public key is listed in your server's ~/.ssh/authorized_keys file
 ssh_user       = "mneumann@ntecs.de"
 ssh_port       = "22"
-document_root  = "~/www.ntecs.de/mn"
+document_root  = "~/www.ntecs.de/"
 rsync_delete   = true
 rsync_args     = ""  # Any extra arguments to pass to rsync
 deploy_default = "rsync"
@@ -16,7 +18,7 @@ deploy_branch  = "gh-pages"
 
 ## -- Misc Configs -- ##
 
-public_dir      = "public/mn"    # compiled site directory
+public_dir      = "public"    # compiled site directory
 source_dir      = "source"    # source file directory
 blog_index_dir  = 'source'    # directory for your blog's index page (if you put your index in source/blog/index.html, set this to 'source/blog')
 deploy_dir      = "_deploy"   # deploy directory (for Github pages deployment)
@@ -223,6 +225,14 @@ task :deploy do
     Rake::Task[:generate].execute
   end
 
+  # Apply minification tasks
+  Rake::Task[:minify_css].execute
+  Rake::Task[:minify_js].execute
+  Rake::Task[:minify_html].execute
+  Rake::Task[:gzip_css].execute
+  Rake::Task[:gzip_js].execute
+  Rake::Task[:gzip_html].execute
+
   Rake::Task[:copydot].invoke(source_dir, public_dir)
   Rake::Task["#{deploy_default}"].execute
 end
@@ -396,6 +406,89 @@ def blog_url(user, project)
   url += "/#{project}" unless project == ''
   url
 end
+
+
+desc "Minify CSS"
+task :minify_css do
+  puts "## Minifying CSS"
+  compressor = YUI::CssCompressor.new
+  Dir.glob("#{public_dir}/**/*.css").each do |name|
+    puts "Minifying #{name}"
+    input = File.read(name)
+    output = File.open("#{name}", "w")
+    output << compressor.compress(input)
+    output.close
+  end
+end
+
+desc "Minify JS"
+task :minify_js do
+  puts "## Minifying JS"
+  compressor = YUI::JavaScriptCompressor.new
+  Dir.glob("#{public_dir}/**/*.js").each do |name|
+    puts "Minifying #{name}"
+
+    if name.end_with?('.min.js')
+      puts "Skipping. Already minified"
+    else
+      input = File.read(name)
+      output = File.open("#{name}", "w")
+      output << compressor.compress(input)
+      output.close
+    end
+  end
+end
+
+desc "Minify HTML"
+task :minify_html do
+  puts "## Minifying HTML"
+  compressor = HtmlCompressor::HtmlCompressor.new
+  Dir.glob("#{public_dir}/**/*.html").each do |name|
+    puts "Minifying #{name}"
+    input = File.read(name)
+    output = File.open("#{name}", "w")
+    output << compressor.compress(input)
+    output.close
+  end
+end
+
+desc "Minify CSS/JS/HTML"
+task :minify => [:minify_css, :minify_js, :minify_html]
+
+def gzip_rec(dir, suffix)
+  Dir["#{dir}/**/*.#{suffix}"].each {|f|
+    if File.file?(f) 
+      puts "gzipping #{f} to #{f}.gz"
+      p `gzip -9 --rsyncable -c #{f} > #{f}.gz`
+    end
+  }
+end
+
+desc "GZip HTML"
+task :gzip_html do
+  puts "## GZipping HTML"
+  gzip_rec(public_dir, "html")
+  #system "find #{public_dir}/ -type f -name \\*.html -exec gzip -9 {} \\;"
+end
+
+desc "GZip CSS"
+task :gzip_css do
+  puts "## GZipping CSS"
+  styles_dir = "#{public_dir}/stylesheets"
+  gzip_rec(styles_dir, "css")
+  #system "find #{styles_dir}/ -type f -name \\*.css -exec gzip -9 {} \\;"
+end
+
+desc "GZip JS"
+task :gzip_js do
+  puts "## GZipping JS"
+  scripts_dir = "#{public_dir}/javascripts"
+  gzip_rec(scripts_dir, "js")
+  #system "find #{scripts_dir}/ -type f -name \\*.js -exec gzip -9 {} \\;"
+end
+
+desc "GZip All"
+task :gzip => [:gzip_html, :gzip_css, :gzip_js]
 
 desc "list tasks"
 task :list do

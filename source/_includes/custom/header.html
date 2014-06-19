@@ -1,0 +1,13 @@
+<hgroup>
+  {% if page.url contains "/blog/" %}
+    <h1><a href="{{ root_url }}/blog">{{ site.title }}</a></h1>
+    {% if site.subtitle %}
+      <h2>{{ site.subtitle }}</h2>
+    {% endif %}
+  {% else %}
+    <h1><a href="{{ root_url }}/">{{ site.pagetitle }}</a></h1>
+    {% if site.pagesubtitle %}
+      <h2>{{ site.pagesubtitle }}</h2>
+    {% endif %}
+  {% endif %}
+</hgroup>

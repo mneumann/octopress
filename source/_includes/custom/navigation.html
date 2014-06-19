@@ -1,0 +1,39 @@
+<ul class="main-navigation">
+
+  {% if page.url == "/index.html" %}
+  <li><a class="selected" href="{{ root_url }}/">About</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/">About</a></li>
+  {% endif %}
+
+  {% if page.url contains "/blog/" %}
+  <li><a class="selected" href="{{ root_url }}/blog">Blog</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/blog">Blog</a></li>
+  {% endif %}
+
+  {% if page.url contains "/code/" %}
+  <li><a class="selected" href="{{ root_url }}/code">Code</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/code">Code</a></li>
+  {% endif %}
+
+  {% if page.url contains "/talks/" %}
+  <li><a class="selected" href="{{ root_url }}/talks">Talks</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/talks">Talks</a></li>
+  {% endif %}
+
+  {% if page.url contains "/references/" %}
+  <li><a class="selected" href="{{ root_url }}/references">References</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/references">References</a></li>
+  {% endif %}
+
+  {% if page.url contains "/contact/" %}
+  <li><a class="selected" href="{{ root_url }}/contact">Contact</a></li>
+  {% else %}
+  <li><a href="{{ root_url }}/contact">Contact</a></li>
+  {% endif %}
+
+</ul>

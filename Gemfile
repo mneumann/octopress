@@ -15,6 +15,9 @@ group :development do
   gem 'stringex', '~> 1.4.0'
   gem 'liquid', '~> 2.3.0'
   gem 'directory_watcher', '1.4.1'
+  gem 'yui-compressor', '~> 0.12.0'
+  gem 'html_compressor', '~> 0.0.3'
+  gem 'RbST'
 end
 
 gem 'sinatra', '~> 1.4.2'
