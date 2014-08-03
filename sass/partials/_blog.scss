@@ -28,6 +28,10 @@ article {
       background: $img-border bottom left repeat-x;
     }
   }
+  //ul, ol { list-style-position: inside; }
+  ul, ol {
+    padding-left: 1.2em;
+  }
   h2 {
     padding-top: 0.8em;
     background: $img-border top left repeat-x;
